@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/projectsActivityLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    tools:context=".screens.ProjectsListScreen.ui.ProjectsActivity">
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/projectsSearchView"
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        app:iconifiedByDefault="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:queryHint="Search by name, leader, year or type" />
+
+
+    <com.google.android.material.chip.ChipGroup
+
+        android:id="@+id/projectsFilterChipGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/projectsSearchView">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayoutInChipGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/leaderChip"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/leader"
+                android:textAlignment="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/yearChip"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/yearChip"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:checked="true"
+
+                android:text="@string/year"
+                android:textAlignment="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/typeChip"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/leaderChip"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/typeChip"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/type"
+                android:textAlignment="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/yearChip"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/projectsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/projectsFilterChipGroup" />
+
+    <ProgressBar
+        android:id="@+id/projectsProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/color_primary"
+        app:layout_constraintBottom_toBottomOf="@+id/projectsRecyclerView"
+        app:layout_constraintEnd_toEndOf="@+id/projectsRecyclerView"
+        app:layout_constraintStart_toStartOf="@id/projectsRecyclerView"
+        app:layout_constraintTop_toTopOf="@+id/projectsRecyclerView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

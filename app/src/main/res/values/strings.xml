@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ExtractingHtmlDemo</string>
+    <string name="send_request">Send request</string>
+    <string name="sample_text">Sample text</string>
+    <string name="adapter_warning">Any error occurred while displaying projects.</string>
+    <string name="sample_name">Sample name</string>
+    <string name="adapter_warning_phases">Phase list in adapter is messed up</string>
+    <string name="some_phase_name">Some phase name</string>
+    <string name="show_locked">Show Locked</string>
+    <string name="logout">Logout</string>
+    <string name="leader">Leader</string>
+    <string name="type">Type</string>
+    <string name="year">Year</string>
+    <string name="username">Username</string>
+    <string name="login">LOGIN</string>
+    <string name="dummy_login">Dummy login</string>
+</resources>
