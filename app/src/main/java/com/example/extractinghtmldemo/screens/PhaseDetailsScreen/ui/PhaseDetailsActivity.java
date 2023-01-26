@@ -2,6 +2,7 @@ package com.example.extractinghtmldemo.screens.PhaseDetailsScreen.ui;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -33,6 +35,8 @@ public class PhaseDetailsActivity extends AppCompatActivity {
     Phase phaseMinimal;
     TextView phaseNameTextView;
 
+    LinearLayout pdfLayout;
+    CardView pdfCardView;
     PDFView pdfView;
 
     ProgressBar phaseDetailsProgressBar;
@@ -70,6 +74,8 @@ public class PhaseDetailsActivity extends AppCompatActivity {
         resourcesRecyclerView.setLayoutManager(new TmiLinearLayoutManager(this, false));
         resourcesRecyclerView.setAdapter(stepsRecyclerViewAdapter);
 
+        pdfLayout = findViewById(R.id.phaseDetailsPdfLayout);
+        pdfCardView = findViewById(R.id.phaseDetailsPdfCardView);
         pdfView = findViewById(R.id.phaseDetailsPdfView);
 
         referencesTitleTextView = findViewById(R.id.phaseDetailsReferencesTitle);
@@ -168,6 +174,8 @@ public class PhaseDetailsActivity extends AppCompatActivity {
     }
 
     private void revealPdfSection() {
+        pdfLayout.setVisibility(View.VISIBLE);
+        pdfCardView.setVisibility(View.VISIBLE);
         pdfView.setVisibility(View.VISIBLE);
     }
 

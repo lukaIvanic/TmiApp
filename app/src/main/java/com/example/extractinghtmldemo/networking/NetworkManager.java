@@ -41,7 +41,7 @@ public class NetworkManager {
         }
         public requestProjectsAsyncTask(String user, String pass) throws UnsupportedEncodingException {
             this.username = user;
-            this.password = pass;
+            this.password = pass;   
             cachedCookie = "session=Tickmark+Info-user=" + URLEncoder.encode(user, StandardCharsets.UTF_8.toString()) +"&Tickmark+Info-pw=" + URLEncoder.encode(pass, StandardCharsets.UTF_8.toString());
         }
 
@@ -302,9 +302,10 @@ public class NetworkManager {
         private void requestPDF(TmiPdfResponseListener tmiPdfResponseListener, String localPath){
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
+            String url = "https://tmi.tickmark-software.com/tmi/" + localPath;
+
             Request request = new Request.Builder()
-//                    .url("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
-                    .url("https://tmi.tickmark-software.com/tmi/" + localPath)
+                    .url(url)
                     .method("GET", null)
                     .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
                     .addHeader("Accept-Language", "en-US,en;q=0.6")

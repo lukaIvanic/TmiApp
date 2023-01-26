@@ -15,7 +15,7 @@ public class TmiFileUtils {
         OutputStream out = null;
 
         try {
-            if(inputStream.available() < 1150 && !isDownload) return false;
+            if(file.getName().endsWith(".pdf") && inputStream.available() < 1150 && !isDownload) return false;
             out = new FileOutputStream(file);
             byte[] buf = new byte[1024 * 1024];
             int len;
@@ -43,10 +43,18 @@ public class TmiFileUtils {
         return true;
     }
 
-    private static final String[] ReservedChars = {"|", "?", "\\*", "<", "\"", ":", ">"};
+    private static final String[] ReservedChars = {"|", "?", "\\*", "<", "\"", ":", ">", " ", "/"};
 
     public static String removeForbiddenCharacters(String string) {
-        return string;
+
+        String retS = string;
+
+        for(int i = 0; i < ReservedChars.length; i++){
+            retS = retS.replace(ReservedChars[i], "_");
+        }
+
+
+        return retS;
     }
 
 

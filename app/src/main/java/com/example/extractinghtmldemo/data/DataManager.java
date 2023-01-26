@@ -146,7 +146,13 @@ public class DataManager {
                     }
 
 
-                    File tempFile = new File(context.getCacheDir(), "temp.docx.pdf");
+                    File tempFile;
+
+                    if(isDownload){
+                        tempFile = new File(context.getCacheDir(), TmiFileUtils.removeForbiddenCharacters(localPath));
+                    } else{
+                        tempFile = new File(context.getCacheDir(), "temp.pdf");
+                    }
 
                     if (copyInputStreamToFile(pdfInputStream, tempFile, isDownload)) {
                         pdfFileListener.getPdfFile(tempFile, null);

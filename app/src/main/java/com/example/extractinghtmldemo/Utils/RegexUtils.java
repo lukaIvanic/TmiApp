@@ -8,7 +8,10 @@ import com.example.extractinghtmldemo.screens.ProjectDetailsScreen.Project;
 import com.example.extractinghtmldemo.screens.StepDetailsScreen.Attachment;
 import com.example.extractinghtmldemo.screens.StepDetailsScreen.Step;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -114,14 +117,6 @@ public class RegexUtils {
                 .collect(Collectors.toList());
     }
 
-    public static List<String> getPhasesLinkIds(String html) {
-        return getRegexMatches(html, "href=\"/tmi/((.){8}/(.){8})");
-    }
-
-    public static List<String> getPhasePdfsLinks(String html) {
-        return getRegexMatches(html, "embed\\(\"(.*?)\"");
-    }
-
     public static Phase getPhaseDetails(String html) {
         List<String> stepsHtml = getRegexMatches(html, "href=\"(/(.){3}/(.){8}/(.){8}/(.){8}/\"(.|\n)*?)</a");
 
@@ -162,23 +157,35 @@ public class RegexUtils {
 
         for (int i = 1; i < attachmentsHtmls.size(); i++) {
             Attachment attachment = new Attachment();
-            List<String> name = getRegexMatches(attachmentsHtmls.get(i), "/(.*?)\"");
-            if (name.size() > 0) {
-                attachment.setAttachmentName(name.get(0).substring(31, name.get(0).length()));
-                attachment.setAttachmentUrlLink("https://tmi.tickmark-software.com/" + name.get(0));
-
-                if (attachmentsHtmls.get(i).contains(".docx") || attachmentsHtmls.get(i).contains(".doc")) {
-                    attachment.setAttachmentType(AttachmentType.DOCX);
-                } else if (attachmentsHtmls.get(i).contains(".pdf")) {
-                    attachment.setAttachmentType(AttachmentType.PDF);
-                } else if(attachmentsHtmls.get(i).contains(".xlsx")) {
-                    attachment.setAttachmentType(AttachmentType.XLSX);
-                } else{
-                    attachment.setAttachmentType(AttachmentType.UNKNOWN);
-                }
-
-                attachmentsList.add(attachment);
+            List<String> name_ = getRegexMatches(attachmentsHtmls.get(i), "fname\"((.|\n)*?)</span");
+            if (name_.size() > 0) {
+                String name = name_.get(0).replace(">", "").trim();
+                attachment.setAttachmentName(name);
             }
+
+            List<String> url_ = getRegexMatches(attachmentsHtmls.get(i), "(.*?)\"");
+            if(url_.size() > 0){
+                try{
+                    String[] urlParts = url_.get(0).split("/");
+                    urlParts[urlParts.length - 1] = URLEncoder.encode( urlParts[urlParts.length - 1], StandardCharsets.UTF_8.toString());
+                    String url = Arrays.stream(urlParts).collect(Collectors.joining("/"));
+                    attachment.setAttachmentUrlLink("https://tmi.tickmark-software.com/" + url_.get(0));
+                }catch (Exception ignored){}
+
+            }
+
+            if (attachmentsHtmls.get(i).contains(".docx") || attachmentsHtmls.get(i).contains(".doc")) {
+                attachment.setAttachmentType(AttachmentType.DOCX);
+            } else if (attachmentsHtmls.get(i).contains(".pdf")) {
+                attachment.setAttachmentType(AttachmentType.PDF);
+            } else if (attachmentsHtmls.get(i).contains(".xls") ) {
+                attachment.setAttachmentType(AttachmentType.XLSX);
+            } else {
+                attachment.setAttachmentType(AttachmentType.UNKNOWN);
+            }
+
+            attachmentsList.add(attachment);
+
         }
 
         List<ExternalReference> externalReferences = getExternalReferences(html);

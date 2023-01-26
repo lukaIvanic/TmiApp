@@ -2,6 +2,7 @@ package com.example.extractinghtmldemo.screens.StepDetailsScreen.ui;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,12 +17,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.extractinghtmldemo.R;
-import com.example.extractinghtmldemo.Utils.TmiFileUtils;
 import com.example.extractinghtmldemo.data.DataManager;
 import com.example.extractinghtmldemo.networking.NetworkManager;
 import com.example.extractinghtmldemo.screens.LoginScreen.ui.LoginActivity;
@@ -44,6 +45,8 @@ public class StepDetailsActivity extends AppCompatActivity {
     Step step;
     TextView stepNameTextView;
 
+    LinearLayout pdfLayout;
+    CardView pdfCardView;
     PDFView stepDetailsPdfView;
 
     ProgressBar stepDetailsProgressBar;
@@ -88,14 +91,13 @@ public class StepDetailsActivity extends AppCompatActivity {
         attachmentsAdapter = new AttachmentsRecyclerViewAdapter(new AttachmentsRecyclerViewAdapter.RowClickListener() {
             @Override
             public void onRowClick(Attachment attachment) {
-                handleAttachmentClick(attachment);
+                openAttachmentFileInExternalApp(attachment);
             }
 
             @Override
             public void onDownloadClick(Attachment attachment) {
 
-//                handleAttachmentDownloadClick();
-                handleAttachmentDownloadClick(attachment);
+                downloadAttachment(attachment);
             }
         });
         attachmentsRecyclerView.setAdapter(attachmentsAdapter);
@@ -108,6 +110,9 @@ public class StepDetailsActivity extends AppCompatActivity {
         stepReferencesRecyclerView.setAdapter(stepReferencesAdapter);
         stepReferencesRecyclerView.setLayoutManager(new TmiLinearLayoutManager(this, false));
 
+
+        pdfLayout = findViewById(R.id.stepDetailsPdfLayout);
+        pdfCardView = findViewById(R.id.stepDetailsPdfCardView);
         stepDetailsPdfView = findViewById(R.id.stepDetailsPdfView);
 
     }
@@ -162,7 +167,7 @@ public class StepDetailsActivity extends AppCompatActivity {
         String thirdPart = step.getStepId().split("/")[2];
         String localPath = firstPart + "/" + secondPart + "/" + thirdPart + "/" + thirdPart + ".docx.pdf";
 
-        DataManager.getPDF(localPath, false,this, (pdfFile, exception) -> {
+        DataManager.getPDF(localPath, false, this, (pdfFile, exception) -> {
             if (exception != null) {
                 //TODO: handle error
                 return;
@@ -181,19 +186,15 @@ public class StepDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void handleAttachmentClick(Attachment attachment) {
-        String localPath;
-        try {
-            localPath = getAttachmentFileUrlPath(attachment.getAttachmentName(), true);
-        } catch (UnsupportedEncodingException e) {
-            Toast.makeText(this, "Couldn't open file.", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private void openAttachmentFileInExternalApp(Attachment attachment) {
 
-        DataManager.getPDF(localPath, true, this, (pdfFile, exception) -> {
+        DataManager.getPDF(attachment.getAttachmentUrlLink().substring(39), true, this, (pdfFile, exception) -> {
 
             if (exception != null) {
-                Toast.makeText(this, exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, exception.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                });
+
                 //TODO handle exception
                 return;
             }
@@ -213,15 +214,29 @@ public class StepDetailsActivity extends AppCompatActivity {
 
     private void openFileInExternalApp(File file) {
 
+        String type = "*/*";
+
+        if (file.getName().endsWith(".pdf")) {
+            type = "application/pdf";
+        } else if (file.getName().endsWith(".docx")) {
+            type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        } else if (file.getName().endsWith(".doc")) {
+            type = "application/msword";
+        } else if (file.getName().endsWith(".xls")) {
+            type = "application/vnd.ms-excel";
+        } else if(file.getName().endsWith("xlsx")){
+            type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        }
+
         Uri uriPdfPath = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", file);
 
-        Intent pdfOpenIntent = new Intent(Intent.ACTION_VIEW);
-        pdfOpenIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        pdfOpenIntent.setClipData(ClipData.newRawUri("", uriPdfPath));
-        pdfOpenIntent.setDataAndType(uriPdfPath, "*/*");
-        pdfOpenIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        Intent fileOpenIntent = new Intent(Intent.ACTION_VIEW);
+        fileOpenIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        fileOpenIntent.setClipData(ClipData.newRawUri("", uriPdfPath));
+        fileOpenIntent.setDataAndType(uriPdfPath, type);
+        fileOpenIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-        startActivity(pdfOpenIntent);
+        startActivity(fileOpenIntent);
     }
 
     private String getAttachmentFileUrlPath(String attachmentName, boolean doEncoding) throws UnsupportedEncodingException {
@@ -239,18 +254,19 @@ public class StepDetailsActivity extends AppCompatActivity {
     }
 
 
-    private void handleAttachmentDownloadClick(Attachment attachment) {
+    private void downloadAttachment(Attachment attachment) {
 
-        try {
-            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-            Uri uri = Uri.parse("https://tmi.tickmark-software.com/tmi/" + getAttachmentFileUrlPath(attachment.getAttachmentName(), false));
-            DownloadManager.Request request = new DownloadManager.Request(uri);
-            request.addRequestHeader("Cookie", NetworkManager.getCachedCookie());
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            manager.enqueue(request);
-        } catch (UnsupportedEncodingException e) {
-            Toast.makeText(this, "File name is corrupted. " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+        if (attachment.getAttachmentUrlLink() == null) {
+            Toast.makeText(this, "File name is not supported. ", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        Uri uri = Uri.parse(attachment.getAttachmentUrlLink());
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+        request.addRequestHeader("Cookie", NetworkManager.getCachedCookie());
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        manager.enqueue(request);
     }
 
 
@@ -269,6 +285,8 @@ public class StepDetailsActivity extends AppCompatActivity {
     }
 
     private void revealPdfSection() {
+        pdfLayout.setVisibility(View.VISIBLE);
+        pdfCardView.setVisibility(View.VISIBLE);
         stepDetailsPdfView.setVisibility(View.VISIBLE);
     }
 
